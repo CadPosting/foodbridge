@@ -44,11 +44,11 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             return session["csrf_token"]
         return {"csrf_token": csrf_token}
 
-    from . import admin, auth, db
+    from . import admin, auth, db, listings
     db.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
-
+    app.register_blueprint(listings.bp)
     @app.route("/")
     def index() -> str:
         return render_template("index.html")

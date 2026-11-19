@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}New listing{% endblock %}
+{% block content %}
+  <h1>Create a food listing</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label>Food description
+      <input type="text" name="description" required>
+    </label>
+
+    <label>Quantity
+      <input type="number" name="quantity" min="1" required>
+    </label>
+
+    <label>Unit
+      <select name="unit" required>
+        <option value="kg">kg</option>
+        <option value="portions">portions</option>
+        <option value="boxes">boxes</option>
+      </select>
+    </label>
+
+    <label>Allergens
+      <input type="text" name="allergens" placeholder="Write 'unknown' if not sure" required>
+    </label>
+
+    <label>Pickup deadline
+      <input type="datetime-local" name="pickup_deadline" required>
+    </label>
+
+    <button type="submit">Create listing</button>
+  </form>
+{% endblock %}
