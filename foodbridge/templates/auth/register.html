@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+  <h1>Register your organisation</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Email <input type="email" name="email" required></label>
+    <label>Password <input type="password" name="password" minlength="8" required></label>
+    <label>Organisation name <input name="org_name" required></label>
+    <label>I am a
+      <select name="role" required>
+        <option value="donor">Food donor (café, bakery, restaurant)</option>
+        <option value="charity">Charity</option>
+      </select>
+    </label>
+    <button type="submit">Register</button>
+  </form>
+{% endblock %}
