@@ -5,6 +5,7 @@ FoodBridge: food donation coordination system
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/flask --app foodbridge init-db   # creates instance/foodbridge.db
+.venv/bin/flask --app foodbridge auth create-admin you@example.com   # first admin (asks for a password)
 .venv/bin/flask --app foodbridge run --debug
 .venv/bin/python -m pytest tests           # pass "tests"; the [7] in the folder path confuses pytest otherwise
 ```

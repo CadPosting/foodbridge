@@ -9,6 +9,7 @@
   <nav>
     <a href="{{ url_for('index') }}">FoodBridge</a>
     {% if g.user %}
+      {% if g.user.role == 'admin' %}<a href="{{ url_for('admin.accounts') }}">Accounts</a>{% endif %}
       <span>{{ g.user.org_name }} ({{ g.user.role }}, {{ g.user.status }})</span>
       <form action="{{ url_for('auth.logout') }}" method="post" style="display:inline">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+{% block content %}
+  <h1>Organisation accounts</h1>
+  <table>
+    <tr><th>Organisation</th><th>Email</th><th>Role</th><th>Status</th><th>Registered</th><th></th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.org_name }}</td><td>{{ u.email }}</td><td>{{ u.role }}</td>
+      <td>{{ u.status }}</td><td>{{ u.created_at }}</td>
+      <td>
+        {% for action in ("approve", "reject") %}
+          <form action="{{ url_for('admin.decide', user_id=u.id, decision=action) }}" method="post" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">{{ action|capitalize }}</button>
+          </form>
+        {% endfor %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">No organisation accounts yet.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

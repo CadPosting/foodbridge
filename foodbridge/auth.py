@@ -4,8 +4,9 @@ import logging
 import sqlite3
 from typing import Any, Callable
 
-from flask import (Blueprint, flash, g, redirect, render_template, request,
-                   session, url_for)
+import click
+from flask import (Blueprint, abort, flash, g, redirect, render_template,
+                   request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
@@ -105,3 +106,42 @@ def login_required(view: Callable[..., Any]) -> Callable[..., Any]:
             return redirect(url_for("auth.login"))
         return view(**kwargs)
     return wrapped
+
+
+def role_required(*roles: str, approved: bool = True) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """FB-12: only logged-in users with one of `roles` (and, by default, an
+    approved account) may use the route. Usage: @role_required("donor")."""
+    # LEARN: this check runs on the server for every request. Hiding a button
+    # in the HTML is not security; anyone can send the POST request directly.
+    def decorator(view: Callable[..., Any]) -> Callable[..., Any]:
+        @functools.wraps(view)
+        @login_required
+        def wrapped(**kwargs: Any) -> Any:
+            if g.user["role"] not in roles:
+                abort(403)  # logged in, but the wrong role
+            if approved and g.user["status"] != "approved":
+                abort(403, "Your account is waiting for administrator approval.")
+            return view(**kwargs)
+        return wrapped
+    return decorator
+
+
+@bp.cli.command("create-admin")
+@click.argument("email")
+@click.password_option()
+def create_admin_command(email: str, password: str) -> None:
+    """Create an approved admin: `flask --app foodbridge auth create-admin EMAIL`."""
+    # LEARN: admins can't register through the website, so the first one is
+    # created from the terminal by someone with access to the server.
+    if len(password) < MIN_PASSWORD_LENGTH:
+        raise click.BadParameter(f"Password must be at least {MIN_PASSWORD_LENGTH} characters.")
+    try:
+        get_db().execute(
+            "INSERT INTO users (email, password_hash, org_name, role, status)"
+            " VALUES (?, ?, 'FoodBridge Admin', 'admin', 'approved')",
+            (email.strip().lower(), generate_password_hash(password)),
+        )
+        get_db().commit()
+    except sqlite3.IntegrityError as exc:
+        raise click.ClickException("That email is already registered.") from exc
+    click.echo(f"Admin {email} created.")
